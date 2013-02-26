@@ -11,11 +11,16 @@
     }],
     "require": {
         "php": ">=5.3.3",
-        "symfony/options-resolver": "2.*"
+        "symfony/options-resolver": "2.2.*",
+        "symfony/console": "2.2.*"
+    }, 
+    "require-dev": {
+        "symfony/finder": "2.1.*"
     },
     "autoload":     {
         "psr-0": {
             "Rezzza\\Vaultage": "src/"
         }
-    }
+    },
+    "minimum-stability": "dev"
 }

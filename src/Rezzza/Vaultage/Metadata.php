@@ -11,27 +11,11 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
  */
 class Metadata
 {
-    /**
-     * @var string
-     */
-    protected $key;
+    public $key;
+    public $needsPassphrase = false;
+    public $passphrase;
 
-    /**
-     * @var array
-     */
     protected $files = array();
-
-    /**
-     * @param string  $key key
-     * 
-     * @return Metadata
-     */
-    public function setKey($key)
-    {
-        $this->key = $key;
-
-        return $this;
-    }
 
     /**
      * @param string $from from
@@ -39,11 +23,19 @@ class Metadata
      * 
      * @return Metadata
      */
-    public function addFile($from, $to)
+    public function addFile(File $file)
     {
-        $this->files[$from] = $to;
+        $this->files[] = $file;
 
         return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getFiles()
+    {
+        return $this->files;
     }
 
     /**
@@ -55,11 +47,13 @@ class Metadata
     {
         $resolver = new OptionsResolver();
         $resolver->setRequired(array('key', 'files'));
-        $resolver->setAllowedTypes(array(
-            'key'   => 'string',
-            'files' => 'array',
+        $resolver->setDefaults(array(
+            'passphrase' => false,
         ));
-
+        $resolver->setAllowedTypes(array(
+            'key'        => 'string',
+            'files'      => 'array',
+        ));
 
         $data = $resolver->resolve($data);
 
@@ -78,13 +72,42 @@ class Metadata
             throw new \LogicException(sprintf('Key cannot be retrieved (path = "%s")', $data['key']));
         }
 
-        $metadata = new static();
-        $metadata->setKey($key);
+        $metadata                  = new static();
+        $metadata->key             = $key;
+        $metadata->needsPassphrase = $data['passphrase'];
 
         foreach ($data['files'] as $from => $to) {
-            $metadata->addFile($from, $to);
+            $metadata->addFile(new File($from, $to, getcwd()));
         }
 
         return $metadata;
+    }
+
+    /**
+     * @param string $name name
+     * 
+     * @return File|null
+     */
+    public function findDecryptedFile($name)
+    {
+        foreach ($this->files as $file) {
+            if ($file->getFrom() == $name) {
+                return $file;
+            }
+        }
+    }
+
+    /**
+     * @param string $name name
+     * 
+     * @return File|null
+     */
+    public function findCryptedFile($name)
+    {
+        foreach ($this->files as $file) {
+            if ($file->getTo() == $name) {
+                return $file;
+            }
+        }
     }
 }

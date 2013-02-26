@@ -3,6 +3,7 @@
 namespace Rezzza\Vaultage\Parser;
 
 use Rezzza\Vaultage\Metadata;
+use Rezzza\Vaultage\Exception\ResourceException;
 
 /**
  * JsonParser 
@@ -17,10 +18,16 @@ class JsonParser implements ParserInterface
      */
     public function parse($path)
     {
+        $content = file_get_contents($path);
+
+        if (false === $content) {
+            throw new ResourceException(sprintf('File "%s" is not exists or is not readable', $path));
+        }
+
         $content = json_decode(file_get_contents($path), true);
 
         if (null === $content) {
-            throw new \InvalidArgumentException(sprintf('File "%s" is not at JSON format', $path));
+            throw new ResourceException(sprintf('File "%s" is not at JSON format', $path));
         }
 
         return Metadata::createFromArray($content);
