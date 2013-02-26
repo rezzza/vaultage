@@ -1,0 +1,21 @@
+{
+    "name": "rezzza/vaultage",
+    "description": "Keep secrets secret",
+    "keywords": ["secret", "configuration"],
+    "type": "standalone",
+    "homepage": "https://github.com/rezzza/vaultage",
+    "license": "MIT",
+    "authors": [{
+        "name": "Community contributors",
+        "homepage": "https://github.com/rezzza/vaultage/contributors"
+    }],
+    "require": {
+        "php": ">=5.3.3",
+        "symfony/options-resolver": "2.*"
+    },
+    "autoload":     {
+        "psr-0": {
+            "Rezzza\\Vaultage": "src/"
+        }
+    }
+}

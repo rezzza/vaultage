@@ -1,0 +1,6 @@
+{
+    "key": "totoatata",
+    "files": {
+        "app/config/parameters.yml.crypted": "app/config/parameters.yml"
+    }
+}
