@@ -8,7 +8,7 @@ on a remote server.
 
 ## Installation
 
-`wget https://github.com/rezzza/vaultage/raw/master/vaultage.phar`
+`wget --no-check-certificate https://github.com/rezzza/vaultage/raw/master/vaultage.phar`
 
 ## Default configuration
 
