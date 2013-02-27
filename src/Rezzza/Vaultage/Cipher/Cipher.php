@@ -8,6 +8,9 @@ use Rezzza\Vaultage\Exception\BadCredentialsException;
 /**
  * Cipher
  *
+ * @inspired from https://gist.github.com/meglio/3965357
+ *
+ * @author Anton Andriyevskyy
  * @author Stephane PY <py.stephane1@gmail.com> 
  */
 class Cipher
