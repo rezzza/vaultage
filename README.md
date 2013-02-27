@@ -37,3 +37,9 @@ There is many options on commands:
 - **files**: Apply encryption/decryption on defined file(s), you can define many file by using comma separator
 - **verbose**: Output the encrypted/decrypted data.
 - **write**: Write on destinary file
+
+## Todo
+
+- Initialization command
+- Write tests
+- Documentation
