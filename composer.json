@@ -15,12 +15,16 @@
         "symfony/console": "2.2.*"
     }, 
     "require-dev": {
-        "symfony/finder": "2.1.*"
+        "symfony/finder": "2.1.*",
+        "atoum/atoum": "dev-master"
     },
     "autoload":     {
         "psr-0": {
             "Rezzza\\Vaultage": "src/"
         }
+    },
+    "config": {
+        "bin-dir": "bin"
     },
     "minimum-stability": "dev"
 }
