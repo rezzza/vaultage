@@ -1,10 +1,10 @@
-Vaultage
-========
+# Vaultage
 
-Securize your files easily by defined a key on local machine. 
-A passphrase can increase security.
+Securize your files easily by defining a key on local machine. A passphrase can
+increase security.
 
-You'll can version your files with criticals data and decrypt these ones on distant server.
+You'll be able to version your files containing criticals data and decrypt them
+on a remote server.
 
 ## Installation
 
@@ -31,12 +31,14 @@ $ ./vaultage.phar encrypt
 $ ./vaultage.phar decrypt
 ```
 
-There is many options on commands:
+Commands have the following options:
 
-- **configuration-file**: Define a specific configuration file (default is .vaultage.json)
-- **files**: Apply encryption/decryption on defined file(s), you can define many file by using comma separator
-- **verbose**: Output the encrypted/decrypted data.
-- **write**: Write on destinary file
+- **configuration-file**: define a specific configuration file (default is
+  `.vaultage.json`);
+- **files**: apply encryption or decryption on defined file(s), you can define
+  many file by using comma separator;
+- **verbose**: output the encrypted/decrypted data;
+- **write**: write on the output file.
 
 ## Todo
 
