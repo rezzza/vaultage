@@ -60,7 +60,12 @@ class Metadata
         $keyData = parse_url($data['key']);
         if (isset($keyData['scheme'])) {
             if ($keyData['scheme'] == 'file') {
-                $key = file_get_contents($keyData['host']);
+                $path = $keyData['host'];
+                if (isset($keyData['path'])) {
+                    $path .= $keyData['path'];
+                }
+
+                $key  = file_get_contents(str_replace('~', getenv('HOME'), $path));
             } else {
                 throw new \InvalidArgumentException('Key only accept file:// scheme, or key directly');
             }
