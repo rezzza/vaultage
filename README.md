@@ -10,6 +10,10 @@ on a remote server.
 
 `wget --no-check-certificate https://github.com/rezzza/vaultage/raw/master/vaultage.phar`
 
+**or**
+
+`curl -O -sL https://github.com/rezzza/vaultage/raw/master/vaultage.phar`
+
 ## Default configuration
 
 Default filename is `.vaultage.json`:
