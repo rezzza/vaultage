@@ -49,7 +49,7 @@ abstract class BaseCommand extends Command
      * @param Metadata        $metadata metadata
      * @param OutputInterface $output   output
      */
-    protected function askTwoTimesForPassphrase(Metadata $metadata, OutputInterface $output)
+    protected function askForPassphraseWithConfirmation(Metadata $metadata, OutputInterface $output)
     {
         $isOk   = false;
         $dialog = $this->getHelperSet()->get('dialog');

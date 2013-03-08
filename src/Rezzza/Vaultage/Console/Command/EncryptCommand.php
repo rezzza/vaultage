@@ -35,7 +35,7 @@ class EncryptCommand extends BaseCommand
         $metadata = $vaultage->getMetadata();
 
         if ($metadata->needsPassphrase) {
-            $this->askTwoTimesForPassphrase($metadata, $output);
+            $this->askForPassphraseWithConfirmation($metadata, $output);
         }
 
         $files = $this->getAskedFiles($input, $metadata, self::ENCRYPT);
