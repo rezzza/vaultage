@@ -8,6 +8,7 @@ use Rezzza\Vaultage\Console\Command\ChangeKeyCommand;
 use Rezzza\Vaultage\Console\Command\CompileCommand;
 use Rezzza\Vaultage\Console\Command\DecryptCommand;
 use Rezzza\Vaultage\Console\Command\EncryptCommand;
+use Rezzza\Vaultage\Console\Command\SelfUpdateCommand;
 
 /**
  * @author Fabien Potencier <fabien@symfony.com>
@@ -25,6 +26,7 @@ class Application extends BaseApplication
 
         $this->add(new EncryptCommand());
         $this->add(new DecryptCommand());
+        $this->add(new SelfUpdateCommand());
         $this->add(new CompileCommand());
     }
 }

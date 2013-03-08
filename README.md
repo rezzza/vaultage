@@ -33,6 +33,7 @@ Default filename is `.vaultage.json`:
 ```sh
 $ ./vaultage.phar encrypt
 $ ./vaultage.phar decrypt
+$ ./vaultage.phar self-update
 ```
 
 Commands have the following options:
