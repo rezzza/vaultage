@@ -49,6 +49,28 @@ abstract class BaseCommand extends Command
      * @param Metadata        $metadata metadata
      * @param OutputInterface $output   output
      */
+    protected function askTwoTimesForPassphrase(Metadata $metadata, OutputInterface $output)
+    {
+        $isOk   = false;
+        $dialog = $this->getHelperSet()->get('dialog');
+
+        while (!$isOk) {
+            $passphrase       = $dialog->askHiddenResponse($output, 'Enter passphrase: ');
+            $secondPassphrase = $dialog->askHiddenResponse($output, 'Confirm passphrase: ');
+
+            if ($secondPassphrase == $passphrase) {
+                $metadata->passphrase = $passphrase;
+                $isOk = true;
+            } else {
+                $output->writeln('<error>Two typed passphrases are not identical, retry:</error>');
+            }
+        }
+    }
+
+    /**
+     * @param Metadata        $metadata metadata
+     * @param OutputInterface $output   output
+     */
     protected function askForPassphrase(Metadata $metadata, OutputInterface $output)
     {
         $dialog               = $this->getHelperSet()->get('dialog');

@@ -33,29 +33,36 @@ class DecryptCommand extends BaseCommand
     {
         $vaultage = $this->getVaultage($input->getOption('configuration-file'));
         $metadata = $vaultage->getMetadata();
+        $files    = $this->getAskedFiles($input, $metadata, self::DECRYPT);
 
-        if ($metadata->needsPassphrase) {
-            $this->askForPassphrase($metadata, $output);
-        }
 
-        $files = $this->getAskedFiles($input, $metadata, self::DECRYPT);
+        $processed = false;
 
-        foreach ($files as $file) {
-            try {
-                $write   = $input->getOption('write');
-                $result  = $vaultage->decrypt($file, $write);
-                $message = $write ? 'File <comment>%s</comment> was decrypted.' : 'File <comment>%s</comment> would be decrypted if write option.';
+        while (!$processed) {
 
-                $output->writeln(sprintf($message, $file->getTo()));
+            if ($metadata->needsPassphrase) {
+                $this->askForPassphrase($metadata, $output);
+            } else {
+                // there is no way of misstyping, retry will make a infinite loop.
+                $processed = true;
+            }
 
-                if ($input->getOption('verbose')) {
-                    $output->writeln(sprintf('Decrypted data: %s', $result));
+            foreach ($files as $file) {
+                try {
+                    $write   = $input->getOption('write');
+                    $result  = $vaultage->decrypt($file, $write);
+                    $message = $write ? 'File <comment>%s</comment> was decrypted.' : 'File <comment>%s</comment> would be decrypted if write option.';
+
+                    $output->writeln(sprintf($message, $file->getTo()));
+
+                    if ($input->getOption('verbose')) {
+                        $output->writeln(sprintf('Decrypted data: %s', $result));
+                    }
+                    $processed = true;
+                } catch (\Exception $e) {
+                    $output->writeln(sprintf('<error>Cannot decrypt file %s: %s</error>', $file->getTo(), $e->getMessage()));
                 }
-            } catch (\Exception $e) {
-                $output->writeln(sprintf('<error>Cannot decrypt file %s: %s</error>', $file->getTo(), $e->getMessage()));
             }
         }
-
-        $output->writeln('<info>Done</info>');
     }
 }
