@@ -3,6 +3,7 @@
 namespace Rezzza\Vaultage;
 
 use Rezzza\Vaultage\Cipher\Cipher;
+use Rezzza\Vaultage\Dumper\ArrayDumper;
 use Rezzza\Vaultage\Exception\BadCredentialsException;
 use Rezzza\Vaultage\Exception\ResourceException;
 use Rezzza\Vaultage\Parser\JsonParser;
@@ -28,6 +29,14 @@ class Vaultage
      */
     public function __construct($file, ParserInterface $parser = null)
     {
+        $this->metadata = new Metadata($file);
+    }
+
+    /**
+     * @param ParserInterface $parser parser
+     */
+    public function buildMetadata(ParserInterface $parser = null)
+    {
         if (null === $parser) {
             $parser = new JsonParser();
         }
@@ -36,7 +45,16 @@ class Vaultage
             throw new \InvalidArgumentException(sprintf('Parser "%s" has to implements ParserInterface', get_class($parser)));
         }
 
-        $this->metadata = $parser->parse($file);
+        $parser->parse($this->metadata);
+    }
+
+    /**
+     * Dump metadatas to the file.
+     */
+    public function dumpMetadatas()
+    {
+        $data = $this->metadata->exportConfiguration();
+        file_put_contents($this->metadata->configuration, ArrayDumper::toJson($data));
     }
 
     /**

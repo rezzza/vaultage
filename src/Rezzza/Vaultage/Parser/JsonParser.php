@@ -16,8 +16,9 @@ class JsonParser implements ParserInterface
     /**
      * {@inheritdoc}
      */
-    public function parse($path)
+    public function parse(Metadata $metadata)
     {
+        $path    = $metadata->configuration;
         $content = file_get_contents($path);
 
         if (false === $content) {
@@ -30,6 +31,6 @@ class JsonParser implements ParserInterface
             throw new ResourceException(sprintf('File "%s" is not at JSON format', $path));
         }
 
-        return Metadata::createFromArray($content);
+        return $metadata->buildFromArray($content);
     }
 }

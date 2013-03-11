@@ -14,6 +14,16 @@ on a remote server.
 
 `curl -O -sL https://github.com/rezzza/vaultage/raw/master/vaultage.phar`
 
+## Commands
+
+```sh
+$ ./vaultage.phar init
+$ ./vaultage.phar self-update
+
+$ ./vaultage.phar encrypt
+$ ./vaultage.phar decrypt
+```
+
 ## Default configuration
 
 Default filename is `.vaultage.json`:
@@ -28,14 +38,6 @@ Default filename is `.vaultage.json`:
 }
 ```
 
-## Commands
-
-```sh
-$ ./vaultage.phar encrypt
-$ ./vaultage.phar decrypt
-$ ./vaultage.phar self-update
-```
-
 Commands have the following options:
 
 - **configuration-file**: define a specific configuration file (default is
@@ -47,6 +49,5 @@ Commands have the following options:
 
 ## Todo
 
-- Initialization command
 - Write tests
 - Documentation

@@ -32,6 +32,8 @@ class EncryptCommand extends BaseCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $vaultage = $this->getVaultage($input->getOption('configuration-file'));
+        $vaultage->buildMetadata();
+
         $metadata = $vaultage->getMetadata();
 
         if ($metadata->needsPassphrase) {

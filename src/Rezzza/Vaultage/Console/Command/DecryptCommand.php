@@ -32,9 +32,10 @@ class DecryptCommand extends BaseCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $vaultage = $this->getVaultage($input->getOption('configuration-file'));
+        $vaultage->buildMetadata();
+
         $metadata = $vaultage->getMetadata();
         $files    = $this->getAskedFiles($input, $metadata, self::DECRYPT);
-
 
         $processed = false;
 

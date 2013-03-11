@@ -11,11 +11,21 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
  */
 class Metadata
 {
+    public $configuration;
+    public $keyFile;
     public $key;
     public $needsPassphrase = false;
     public $passphrase;
 
     protected $files = array();
+
+    /**
+     * @param string $configuration path to configuration
+     */
+    public function __construct($configuration)
+    {
+        $this->configuration = $configuration;
+    }
 
     /**
      * @param string $from from
@@ -40,10 +50,8 @@ class Metadata
 
     /**
      * @param array $data data
-     * 
-     * @return Metadata
      */
-    public static function createFromArray(array $data)
+    public function buildFromArray(array $data)
     {
         $resolver = new OptionsResolver();
         $resolver->setRequired(array('key', 'files'));
@@ -56,36 +64,66 @@ class Metadata
         ));
 
         $data = $resolver->resolve($data);
+        $key  = $data['key'];
 
-        $keyData = parse_url($data['key']);
-        if (isset($keyData['scheme'])) {
-            if ($keyData['scheme'] == 'file') {
-                $path = $keyData['host'];
-                if (isset($keyData['path'])) {
-                    $path .= $keyData['path'];
-                }
-
-                $key  = file_get_contents(str_replace('~', getenv('HOME'), $path));
-            } else {
-                throw new \InvalidArgumentException('Key only accept file:// scheme, or key directly');
+        if (strpos($key, 'file://') === 0) {
+            $this->keyFile = $key;
+            $absoluteKeyFile = $this->getAbsoluteKeyFile();
+            if (file_exists($absoluteKeyFile)) {
+                $key = file_get_contents($this->getAbsoluteKeyFile());
             }
-        } else {
-            $key = $keyData['path'];
         }
+
+        $this->key = $key;
 
         if (!$key) {
             throw new \LogicException(sprintf('Key cannot be retrieved (path = "%s")', $data['key']));
         }
 
-        $metadata                  = new static();
-        $metadata->key             = $key;
-        $metadata->needsPassphrase = $data['passphrase'];
+        $this->key             = $key;
+        $this->needsPassphrase = $data['passphrase'];
 
         foreach ($data['files'] as $from => $to) {
-            $metadata->addFile(new File($from, $to, getcwd()));
+            $this->addFile(new File($from, $to, getcwd()));
+        }
+    }
+
+    /**
+     * @return string
+     */
+    public function getAbsoluteKeyFile()
+    {
+        if (!$this->keyFile) {
+            return null;
         }
 
-        return $metadata;
+        $keyData = parse_url($this->keyFile);
+        $path = $keyData['host'];
+        if (isset($keyData['path'])) {
+            $path .= $keyData['path'];
+        }
+
+        return str_replace('~', getenv('HOME'), $path);
+    }
+
+    /**
+     * Export metadatas to configuration format
+     * 
+     * @return array
+     */
+    public function exportConfiguration()
+    {
+        $data = array(
+            'key'        => (null !== $this->keyFile) ? $this->keyFile : $this->key,
+            'passphrase' => $this->needsPassphrase,
+            'files'      => array(),
+        );
+
+        foreach ($this->files as $file) {
+            $data['files'][$file->getFrom()] = $file->getTo();
+        }
+
+        return $data;
     }
 
     /**
