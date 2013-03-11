@@ -11,11 +11,21 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
  */
 class Metadata
 {
+    public $configuration;
+    public $keyFile;
     public $key;
     public $needsPassphrase = false;
     public $passphrase;
 
     protected $files = array();
+
+    /**
+     * @param string $configuration path to configuration
+     */
+    public function __construct($configuration)
+    {
+        $this->configuration = $configuration;
+    }
 
     /**
      * @param string $from from
@@ -40,10 +50,8 @@ class Metadata
 
     /**
      * @param array $data data
-     * 
-     * @return Metadata
      */
-    public static function createFromArray(array $data)
+    public function buildFromArray(array $data)
     {
         $resolver = new OptionsResolver();
         $resolver->setRequired(array('key', 'files'));
@@ -60,6 +68,7 @@ class Metadata
         $keyData = parse_url($data['key']);
         if (isset($keyData['scheme'])) {
             if ($keyData['scheme'] == 'file') {
+                $this->keyFile = $data['key'];
                 $path = $keyData['host'];
                 if (isset($keyData['path'])) {
                     $path .= $keyData['path'];
@@ -77,15 +86,32 @@ class Metadata
             throw new \LogicException(sprintf('Key cannot be retrieved (path = "%s")', $data['key']));
         }
 
-        $metadata                  = new static();
-        $metadata->key             = $key;
-        $metadata->needsPassphrase = $data['passphrase'];
+        $this->key             = $key;
+        $this->needsPassphrase = $data['passphrase'];
 
         foreach ($data['files'] as $from => $to) {
-            $metadata->addFile(new File($from, $to, getcwd()));
+            $this->addFile(new File($from, $to, getcwd()));
+        }
+    }
+
+    /**
+     * Export metadatas to configuration format
+     * 
+     * @return array
+     */
+    public function exportConfiguration()
+    {
+        $data = array(
+            'key'        => (null !== $this->keyFile) ? $this->keyFile : $this->key,
+            'passphrase' => $this->needsPassphrase,
+            'files'      => array(),
+        );
+
+        foreach ($this->files as $file) {
+            $data['files'][$file->getFrom()] = $file->getTo();
         }
 
-        return $metadata;
+        return $data;
     }
 
     /**

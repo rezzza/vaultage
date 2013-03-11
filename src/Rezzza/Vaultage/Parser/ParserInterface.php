@@ -12,9 +12,7 @@ use Rezzza\Vaultage\Metadata;
 interface ParserInterface
 {
     /**
-     * @param string $path path
-     * 
-     * @return Metadata
+     * @param Metadata $metadata
      */
-    public function parse($file);
+    public function parse(Metadata $metadata);
 }
