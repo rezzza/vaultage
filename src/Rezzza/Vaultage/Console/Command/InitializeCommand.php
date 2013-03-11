@@ -51,15 +51,23 @@ class InitializeCommand extends Command
 
         if (strpos($key, 'file://') === 0) {
             $metadata->keyFile = $key;
+            $keyFile = $metadata->getAbsoluteKeyFile();
             // here we could generate him a key
+            if (!file_exists($keyFile)) {
+                if($dialog->askConfirmation($output, 'Do you want we generate a key for you? <comment>(Y/n)</comment>: ')) {
+                    file_put_contents($keyFile, hash('sha512', uniqid()));
+                }
+            }
         } else {
             $metadata->key     = $key;
         }
 
-        $metadata->needsPassphrase = $dialog->askConfirmation($output, 'Using passphrase <comment>(y/n)</comment>: ');
+        $metadata->needsPassphrase = $dialog->askConfirmation($output, 'Using passphrase <comment>(Y/n)</comment>: ');
+
+        $output->writeln('<comment>Enter coma separated couple of files you wanna vault : "path/to/decrypted_file,path/to/encrypted_file" (press return to stop adding files)</comment>');
 
         while(true) {
-            $files = $dialog->ask($output, 'Enter files used by vaultage: <comment>"path/to/decrypted_file,path/to/encrypted_file"</comment>, press <return> to stop adding files: ');
+            $files = $dialog->ask($output, 'files: ');
 
             if (null === $files) {
                 break;

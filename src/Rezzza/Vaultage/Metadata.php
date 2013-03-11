@@ -64,23 +64,17 @@ class Metadata
         ));
 
         $data = $resolver->resolve($data);
+        $key  = $data['key'];
 
-        $keyData = parse_url($data['key']);
-        if (isset($keyData['scheme'])) {
-            if ($keyData['scheme'] == 'file') {
-                $this->keyFile = $data['key'];
-                $path = $keyData['host'];
-                if (isset($keyData['path'])) {
-                    $path .= $keyData['path'];
-                }
-
-                $key  = file_get_contents(str_replace('~', getenv('HOME'), $path));
-            } else {
-                throw new \InvalidArgumentException('Key only accept file:// scheme, or key directly');
+        if (strpos($key, 'file://') === 0) {
+            $this->keyFile = $key;
+            $absoluteKeyFile = $this->getAbsoluteKeyFile();
+            if (file_exists($absoluteKeyFile)) {
+                $key = file_get_contents($this->getAbsoluteKeyFile());
             }
-        } else {
-            $key = $keyData['path'];
         }
+
+        $this->key = $key;
 
         if (!$key) {
             throw new \LogicException(sprintf('Key cannot be retrieved (path = "%s")', $data['key']));
@@ -92,6 +86,24 @@ class Metadata
         foreach ($data['files'] as $from => $to) {
             $this->addFile(new File($from, $to, getcwd()));
         }
+    }
+
+    /**
+     * @return string
+     */
+    public function getAbsoluteKeyFile()
+    {
+        if (!$this->keyFile) {
+            return null;
+        }
+
+        $keyData = parse_url($this->keyFile);
+        $path = $keyData['host'];
+        if (isset($keyData['path'])) {
+            $path .= $keyData['path'];
+        }
+
+        return str_replace('~', getenv('HOME'), $path);
     }
 
     /**
