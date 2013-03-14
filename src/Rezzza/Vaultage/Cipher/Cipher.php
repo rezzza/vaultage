@@ -33,7 +33,7 @@ class Cipher
     public function __construct()
     {
         $this->cipher  = MCRYPT_RIJNDAEL_256;
-        $this->mode    = MCRYPT_MODE_CBC;
+        $this->mode    = MCRYPT_MODE_ECB;
         $this->iv      = mcrypt_create_iv(mcrypt_get_iv_size($this->cipher, $this->mode), MCRYPT_RAND);
     }
 
@@ -48,8 +48,7 @@ class Cipher
         $token = $this->extractTokenFromMetadata($metadata);
         $str   = substr(md5($str), 0, 4).$str;
 
-        $enc = $this->iv.mcrypt_encrypt($this->cipher, $token, $str, $this->mode, $this->iv);
-        return base64_encode($enc);
+        return base64_encode(mcrypt_encrypt($this->cipher, $token, $str, $this->mode, $this->iv));
     }
 
     /**
@@ -67,9 +66,7 @@ class Cipher
             throw new BadCredentialsException('Code has not expected length');
         }
 
-        $iv = substr($str, 0, 32);
-        $encrypted = substr($str, 32);
-        $decrypted = rtrim(mcrypt_decrypt($this->cipher, $token, $encrypted, $this->mode, $iv), "\0");
+        $decrypted = rtrim(mcrypt_decrypt($this->cipher, $token, $str, $this->mode, $this->iv), "\0");
  
         if ($decrypted === false || is_null($decrypted) || strlen($decrypted) < 4) {
             throw new BadCredentialsException('Bad credentials');
