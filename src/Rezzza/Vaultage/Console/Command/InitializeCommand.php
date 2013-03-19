@@ -42,19 +42,25 @@ class InitializeCommand extends BaseCommand
             throw new \InvalidArgumentException(sprintf('Configuration file "%s" is already exists.', $config));
         }
 
-        $io      = $this->getIO();
-        $isOk    = false;
+        $io       = $this->getIO();
+        $backends = Factory::getAvailableBackends();
 
-        while (!$isOk) {
-            try {
-                $backend = Factory::create($io->ask('Enter backend (<comment>basic</comment>): '));
-                $isOk = true;
-            } catch (\Exception $e) {
-                $io->writeln(sprintf('<error>%s</error>', $e->getMessage()));
+        $validation = function ($v) use ($backends) {
+            if (!in_array($v, array_values($backends))) {
+                throw new \InvalidArgumentException(sprintf('Backend "%s" is invalid.', $v));
             }
-        }
 
-        $backend->setIO($io)
+            return $v;
+        };
+
+        $default = 'basic';
+        $backend = $io->askAndValidate(
+            sprintf('Choose a backend from <comment>%s</comment> (default is %s): ', implode(', ', $backends), $default), 
+            $validation, false, $default, $backends
+        );
+
+        Factory::create($backend)
+            ->setIO($io)
             ->initialize($config);
     }
 }

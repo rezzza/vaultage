@@ -32,11 +32,19 @@ class File
      * @param string $to        to
      * @param string $directory directory
      */
-    public function __construct($from, $to, $directory)
+    public function __construct($from, $to = null, $directory)
     {
         $this->from         = $from;
         $this->to           = $to;
         $this->directory    = $directory;
+    }
+
+    /**
+     * @return string
+     */
+    public function __toString()
+    {
+        return $this->from;
     }
 
     /**

@@ -24,20 +24,11 @@ $ ./vaultage.phar encrypt
 $ ./vaultage.phar decrypt
 ```
 
-## Default configuration
+## Backends
 
-Default filename is `.vaultage.json`:
+[Basic](doc/backend_basic.md)
 
-```json
-{
-    "backend": "basic",
-    "key": "file://~/.vaultage/your_project.key",
-    "passphrase": true,
-    "files": {
-        "app/config/parameters.yml": "app/config/parameters.yml.crypted"
-    }
-}
-```
+[GPG](doc/backend_gpg.md)
 
 Commands have the following options:
 
