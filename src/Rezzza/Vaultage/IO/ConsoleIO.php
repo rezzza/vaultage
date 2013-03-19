@@ -42,6 +42,16 @@ class ConsoleIO implements IOInterface
         return $this->output->writeln($string);
     }
 
+    public function write($string)
+    {
+        return $this->output->write($string);
+    }
+
+    public function isVerbose()
+    {
+        return $this->getInputOption('verbose');
+    }
+
     public function askAndRepeatHidden($ask, $secondAsk)
     {
         $dialog = $this->helperSet->get('dialog');
@@ -58,13 +68,23 @@ class ConsoleIO implements IOInterface
         }
     }
 
-    public function ask($question, $default = null)
+    public function ask($question, $default = null, array $autocomplete = null)
     {
-        return $this->helperSet->get('dialog')->ask($this->output, $question, $default);
+        return $this->helperSet->get('dialog')->ask($this->output, $question, $default, $autocomplete);
+    }
+
+    public function askHiddenResponse($question)
+    {
+        return $this->helperSet->get('dialog')->askHiddenResponse($this->output, $question);
     }
 
     public function askConfirmation($question, $default = true)
     {
         return $this->helperSet->get('dialog')->askConfirmation($this->output, $question, $default);
+    }
+
+    public function askAndValidate($question, $validator, $attempts = false, $default = null, $choices = array())
+    {
+        return $this->helperSet->get('dialog')->askAndValidate($this->output, $question, $validator, $attempts, $default, $choices);
     }
 }

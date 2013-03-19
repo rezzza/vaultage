@@ -75,7 +75,7 @@ class Backend extends AbstractBackend implements BackendInterface
         while (!$processed) {
 
             if ($this->metadata->needsPassphrase) {
-                $this->metadata->passphrase = $this->io->ask('Enter passphrase: ');
+                $this->metadata->passphrase = $this->io->askHiddenResponse('Enter passphrase: ');
             } else {
                 // there is no way of misstyping, retry will make a infinite loop.
                 $processed = true;
