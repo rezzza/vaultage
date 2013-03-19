@@ -6,8 +6,9 @@ use Rezzza\Vaultage\Metadata;
 use Rezzza\Vaultage\Vaultage;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Rezzza\Vaultage\Console\Application;
+use Rezzza\Vaultage\IO\IOInterface;
 
 /**
  * BaseCommand
@@ -17,8 +18,7 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 abstract class BaseCommand extends Command
 {
-    CONST ENCRYPT = 'encrypt'; 
-    CONST DECRYPT = 'decrypt'; 
+    protected $io;
 
     /**
      * @see Command
@@ -33,73 +33,35 @@ abstract class BaseCommand extends Command
 
     /**
      * @param string|null $config config
-     * 
-     * @return Vaultage 
+     *
+     * @return Vaultage
      */
-    protected function getVaultage($config)
+    protected function getBackend($config)
     {
         if (null === $config) {
             $config = getcwd().DIRECTORY_SEPARATOR.'.vaultage.json';
         }
 
-        return new Vaultage($config);
+        $vaultage = new Vaultage();
+
+        return $vaultage->buildBackend($config);
     }
 
     /**
-     * @param Metadata        $metadata metadata
-     * @param OutputInterface $output   output
+     * @return IOInterface
      */
-    protected function askForPassphraseWithConfirmation(Metadata $metadata, OutputInterface $output)
+    public function getIo()
     {
-        $isOk   = false;
-        $dialog = $this->getHelperSet()->get('dialog');
-
-        while (!$isOk) {
-            $passphrase       = $dialog->askHiddenResponse($output, 'Enter passphrase: ');
-            $secondPassphrase = $dialog->askHiddenResponse($output, 'Confirm passphrase: ');
-
-            if ($secondPassphrase == $passphrase) {
-                $metadata->passphrase = $passphrase;
-                $isOk = true;
+        if (null === $this->io) {
+            $application = $this->getApplication();
+            if ($application instanceof Application) {
+                /* @var $application    Application */
+                $this->io = $application->getIO();
             } else {
-                $output->writeln('<error>Two typed passphrases are not identical, retry:</error>');
+                throw new \LogicException('Works on console environment.');
             }
         }
-    }
 
-    /**
-     * @param Metadata        $metadata metadata
-     * @param OutputInterface $output   output
-     */
-    protected function askForPassphrase(Metadata $metadata, OutputInterface $output)
-    {
-        $dialog               = $this->getHelperSet()->get('dialog');
-        $metadata->passphrase = $dialog->askHiddenResponse($output, 'Enter passphrase: ');
-    }
-
-    /**
-     * @param InputInterface $input    input
-     * @param Metadata       $metadata metadata
-     * @param string         $type     type
-     * 
-     * @return array<File>
-     */
-    protected function getAskedFiles(InputInterface $input, Metadata $metadata, $type)
-    {
-        $files = $input->getOption('files');
-
-        if (empty($files)) {
-            return $metadata->getFiles();
-        }
-
-        $files  = array_filter(explode(',', $files));
-        $data   = array();
-        $method = $type === self::ENCRYPT ? 'findDecryptedFile' : 'findCryptedFile';
-
-        foreach ($files as $file) {
-            $data[] = $metadata->{$method}($file);
-        }
-
-        return array_filter($data);
+        return $this->io;
     }
 }

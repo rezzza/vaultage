@@ -30,6 +30,7 @@ Default filename is `.vaultage.json`:
 
 ```json
 {
+    "backend": "basic",
     "key": "file://~/.vaultage/your_project.key",
     "passphrase": true,
     "files": {

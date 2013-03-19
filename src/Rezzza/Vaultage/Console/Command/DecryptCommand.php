@@ -31,39 +31,8 @@ class DecryptCommand extends BaseCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $vaultage = $this->getVaultage($input->getOption('configuration-file'));
-        $vaultage->buildMetadata();
-
-        $metadata = $vaultage->getMetadata();
-        $files    = $this->getAskedFiles($input, $metadata, self::DECRYPT);
-
-        $processed = false;
-
-        while (!$processed) {
-
-            if ($metadata->needsPassphrase) {
-                $this->askForPassphrase($metadata, $output);
-            } else {
-                // there is no way of misstyping, retry will make a infinite loop.
-                $processed = true;
-            }
-
-            foreach ($files as $file) {
-                try {
-                    $write   = $input->getOption('write');
-                    $result  = $vaultage->decrypt($file, $write);
-                    $message = $write ? 'File <comment>%s</comment> was decrypted.' : 'File <comment>%s</comment> would be decrypted if write option.';
-
-                    $output->writeln(sprintf($message, $file->getTo()));
-
-                    if ($input->getOption('verbose')) {
-                        $output->writeln(sprintf('Decrypted data: %s', $result));
-                    }
-                    $processed = true;
-                } catch (\Exception $e) {
-                    $output->writeln(sprintf('<error>Cannot decrypt file %s: %s</error>', $file->getTo(), $e->getMessage()));
-                }
-            }
-        }
+        $this->getBackend($input->getOption('configuration-file'))
+            ->setIO($this->getIO())
+            ->decrypt();
     }
 }

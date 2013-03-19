@@ -1,15 +1,18 @@
 <?php
 
-namespace Rezzza\Vaultage;
+namespace Rezzza\Vaultage\Backend\Basic;
 
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Rezzza\Vaultage\File;
+use Rezzza\Vaultage\Backend\MetadataInterface;
 
 /**
  * Metadata
  *
- * @author Stephane PY <py.stephane1@gmail.com> 
+ * @uses MetadataInterface
+ * @author Stephane PY <py.stephane1@gmail.com>
  */
-class Metadata
+class Metadata implements MetadataInterface
 {
     public $configuration;
     public $keyFile;
@@ -20,42 +23,16 @@ class Metadata
     protected $files = array();
 
     /**
-     * @param string $configuration path to configuration
+     * {@inheritdoc}
      */
-    public function __construct($configuration)
+    public function build($configuration, array $data)
     {
         $this->configuration = $configuration;
-    }
 
-    /**
-     * @param string $from from
-     * @param string $to   to
-     * 
-     * @return Metadata
-     */
-    public function addFile(File $file)
-    {
-        $this->files[] = $file;
-
-        return $this;
-    }
-
-    /**
-     * @return array
-     */
-    public function getFiles()
-    {
-        return $this->files;
-    }
-
-    /**
-     * @param array $data data
-     */
-    public function buildFromArray(array $data)
-    {
         $resolver = new OptionsResolver();
         $resolver->setRequired(array('key', 'files'));
         $resolver->setDefaults(array(
+            'backend'    => null,
             'passphrase' => false,
         ));
         $resolver->setAllowedTypes(array(
@@ -89,6 +66,27 @@ class Metadata
     }
 
     /**
+     * @param string $from from
+     * @param string $to   to
+     *
+     * @return Metadata
+     */
+    public function addFile(File $file)
+    {
+        $this->files[] = $file;
+
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getFiles()
+    {
+        return $this->files;
+    }
+
+    /**
      * @return string
      */
     public function getAbsoluteKeyFile()
@@ -108,12 +106,13 @@ class Metadata
 
     /**
      * Export metadatas to configuration format
-     * 
+     *
      * @return array
      */
     public function exportConfiguration()
     {
         $data = array(
+            'backend'    => 'basic',
             'key'        => (null !== $this->keyFile) ? $this->keyFile : $this->key,
             'passphrase' => $this->needsPassphrase,
             'files'      => array(),
@@ -128,7 +127,7 @@ class Metadata
 
     /**
      * @param string $name name
-     * 
+     *
      * @return File|null
      */
     public function findDecryptedFile($name)
@@ -142,7 +141,7 @@ class Metadata
 
     /**
      * @param string $name name
-     * 
+     *
      * @return File|null
      */
     public function findCryptedFile($name)
@@ -153,4 +152,5 @@ class Metadata
             }
         }
     }
+
 }

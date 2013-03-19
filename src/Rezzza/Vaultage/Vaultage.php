@@ -2,130 +2,58 @@
 
 namespace Rezzza\Vaultage;
 
-use Rezzza\Vaultage\Cipher\Cipher;
-use Rezzza\Vaultage\Dumper\ArrayDumper;
-use Rezzza\Vaultage\Exception\BadCredentialsException;
-use Rezzza\Vaultage\Exception\ResourceException;
+use Rezzza\Vaultage\Backend\BackendInterface;
 use Rezzza\Vaultage\Parser\JsonParser;
 use Rezzza\Vaultage\Parser\ParserInterface;
 
 /**
  * Vaultage
  *
- * @author Stephane PY <py.stephane1@gmail.com> 
+ * @author Stephane PY <py.stephane1@gmail.com>
  */
 class Vaultage
 {
-    CONST VERSION = '0.1';
+    CONST VERSION = '0.2';
 
     /**
-     * @var Metadata
+     * @var BackendInterface
      */
-    protected $metadata;
+    protected $backend;
 
     /**
      * @param string          $file   file
      * @param ParserInterface $parser parser
+     *
+     * @return BackendInterface
      */
-    public function __construct($file, ParserInterface $parser = null)
-    {
-        $this->metadata = new Metadata($file);
-    }
-
-    /**
-     * @param ParserInterface $parser parser
-     */
-    public function buildMetadata(ParserInterface $parser = null)
+    public function buildBackend($file, ParserInterface $parser = null)
     {
         if (null === $parser) {
             $parser = new JsonParser();
         }
 
-        if (!$parser instanceof ParserInterface) {
-            throw new \InvalidArgumentException(sprintf('Parser "%s" has to implements ParserInterface', get_class($parser)));
-        }
+        $this->setBackend($parser->parse($file));
 
-        $parser->parse($this->metadata);
+        return $this->getBackend();
     }
 
     /**
-     * Dump metadatas to the file.
-     */
-    public function dumpMetadatas()
-    {
-        $data = $this->metadata->exportConfiguration();
-        file_put_contents($this->metadata->configuration, ArrayDumper::toJson($data));
-    }
-
-    /**
-     * @param File    $file  file
-     * @param boolean $write write
-     * 
-     * @return string
-     */
-    public function encrypt(File $file, $write = false)
-    {
-        $from = new \SplFileInfo($file->getFrom(File::ABSOLUTE_PATH));
-
-        if (!$from->isReadable()) {
-            throw new ResourceException(sprintf('File "%s" is not readable', $from));
-        }
-
-        $data = $this->getCipher()
-            ->encrypt(file_get_contents($from), $this->metadata);
-
-        if ($write) {
-            $to = new \SplFileInfo($file->getTo(File::ABSOLUTE_PATH));
-
-            $to->openFile('w+')
-                ->fwrite($data);
-        }
-
-        return $data;
-    }
-
-    /**
-     * @throws BadCredentialsException
+     * @param BackendInterface $backend backend
      *
-     * @param File    $file  file
-     * @param boolean $write write
-     *
-     * return string
+     * @return Vaultage
      */
-    public function decrypt(File $file, $write = false)
+    public function setBackend(BackendInterface $backend)
     {
-        $to   = new \SplFileInfo($file->getTo(File::ABSOLUTE_PATH));
+        $this->backend = $backend;
 
-        if (!$to->isReadable()) {
-            throw new ResourceException(sprintf('File "%s" is not writable', $to));
-        }
-
-        $data = $this->getCipher()
-            ->decrypt(file_get_contents($to), $this->metadata);
-
-        if ($write) {
-            $from = new \SplFileInfo($file->getFrom(File::ABSOLUTE_PATH));
-            
-            $from->openFile('w+')
-                ->fwrite($data);
-        }
-
-        return $data;
+        return $this;
     }
 
     /**
-     * @return Metadata
+     * @return BackendInterface
      */
-    public function getMetadata()
+    public function getBackend()
     {
-        return $this->metadata;
-    }
-
-    /**
-     * @return Cipher
-     */
-    public function getCipher()
-    {
-        return new Cipher();
+        return $this->backend;
     }
 }

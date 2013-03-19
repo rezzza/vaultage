@@ -5,7 +5,7 @@ namespace Rezzza\Vaultage;
 /**
  * File
  *
- * @author Stephane PY <py.stephane1@gmail.com> 
+ * @author Stephane PY <py.stephane1@gmail.com>
  */
 class File
 {
@@ -41,7 +41,7 @@ class File
 
     /**
      * @param boolean $absolute absolute
-     * 
+     *
      * @return string
      */
     public function getFrom($absolute = self::RELATIVE_PATH)

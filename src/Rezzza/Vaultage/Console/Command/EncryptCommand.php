@@ -31,33 +31,8 @@ class EncryptCommand extends BaseCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $vaultage = $this->getVaultage($input->getOption('configuration-file'));
-        $vaultage->buildMetadata();
-
-        $metadata = $vaultage->getMetadata();
-
-        if ($metadata->needsPassphrase) {
-            $this->askForPassphraseWithConfirmation($metadata, $output);
-        }
-
-        $files = $this->getAskedFiles($input, $metadata, self::ENCRYPT);
-
-        foreach ($files as $file) {
-            try {
-                $write   = $input->getOption('write');
-                $result  = $vaultage->encrypt($file, $write);
-                $message = $write ? 'File <comment>%s</comment> was encrypted.' : 'File <comment>%s</comment> would be encrypted if write option.';
-
-                $output->writeln(sprintf($message, $file->getFrom()));
-
-                if ($input->getOption('verbose')) {
-                    $output->writeln(sprintf('Encrypted data: %s', $result));
-                }
-            } catch (\Exception $e) {
-                $output->writeln(sprintf('<error>Cannot encrypt file %s: %s</error>', $file->getFrom(), $e->getMessage()));
-            }
-        }
-
-        $output->writeln('<info>Done</info>');
+        $this->getBackend($input->getOption('configuration-file'))
+            ->setIO($this->getIO())
+            ->encrypt();
     }
 }

@@ -1,8 +1,7 @@
 <?php
 
-namespace Rezzza\Vaultage\Cipher;
+namespace Rezzza\Vaultage\Backend\Basic;
 
-use Rezzza\Vaultage\Metadata;
 use Rezzza\Vaultage\Exception\BadCredentialsException;
 
 /**
@@ -11,7 +10,7 @@ use Rezzza\Vaultage\Exception\BadCredentialsException;
  * @inspired from https://gist.github.com/meglio/3965357
  *
  * @author Anton Andriyevskyy
- * @author Stephane PY <py.stephane1@gmail.com> 
+ * @author Stephane PY <py.stephane1@gmail.com>
  */
 class Cipher
 {
@@ -38,10 +37,7 @@ class Cipher
     }
 
     /**
-     * @param string   $str      str
-     * @param Metadata $metadata metadata
-     * 
-     * @return string
+     * {@inheritdoc}
      */
     public function encrypt($str, Metadata $metadata)
     {
@@ -52,10 +48,7 @@ class Cipher
     }
 
     /**
-     * @param string   $data     data
-     * @param Metadata $metadata metadata
-     * 
-     * @return string|false
+     * {@inheritdoc}
      */
     public function decrypt($str, Metadata $metadata)
     {
@@ -67,14 +60,14 @@ class Cipher
         }
 
         $decrypted = rtrim(mcrypt_decrypt($this->cipher, $token, $str, $this->mode, $this->iv), "\0");
- 
+
         if ($decrypted === false || is_null($decrypted) || strlen($decrypted) < 4) {
             throw new BadCredentialsException('Bad credentials');
         }
 
         $dataHash = substr($decrypted, 0, 4);
         $data     = substr($decrypted, 4);
-        
+
         if (substr(md5($data), 0, 4) !== $dataHash) {
             throw new BadCredentialsException('Bad credentials');
         }
@@ -84,7 +77,7 @@ class Cipher
 
     /**
      * @param Metadata $metadata metadata
-     * 
+     *
      * @return string
      */
     private function extractTokenFromMetadata(Metadata $metadata)

@@ -3,7 +3,7 @@
 namespace Rezzza\Vaultage\Dumper;
 
 /**
- * ArrayDumper 
+ * ArrayDumper
  * from https://github.com/composer/composer/blob/master/src/Composer/Package/Dumper/ArrayDumper.php
  *
  * @author Konstantin Kudryashiv <ever.zet@gmail.com>
