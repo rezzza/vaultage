@@ -19,8 +19,8 @@ class Backend extends AbstractBackend implements BackendInterface
      */
     public function encrypt()
     {
-        $files   = $this->getFiles(self::ENCRYPT);
-        $write   = $this->getInputOption('write');
+        $files            = $this->getFiles(self::ENCRYPT);
+        $defaultArguments = $this->buildDefaultArguments();
 
         if ($this->metadata->asymmetric) {
             $recipientsString = '';
@@ -28,18 +28,18 @@ class Backend extends AbstractBackend implements BackendInterface
                 $recipientsString .= sprintf('-r "%s" ', $recipient);
             }
 
-            $command = sprintf('gpg %s --yes %s --encrypt-files %s', $recipientsString, (!$write) ? '--dry-run': '', implode(' ', $files));
+            $command = sprintf('gpg %s %s --encrypt-files %s', $defaultArguments, $recipientsString, implode(' ', $files));
             $this->exec('Encrypt files', $command);
         } else {
             $passphrase = $this->io->askAndRepeatHidden('Enter passphrase: ', 'Confirm passphrase: ');
 
             foreach ($files as $file) {
-                $command = sprintf('gpg --no-use-agent --yes %s --passphrase "%s" -c %s', (!$write) ? '--dry-run': '', $passphrase, $file);
+                $command = sprintf('gpg %s --no-use-agent %s --passphrase "%s" -c %s', $defaultArguments, $passphrase, $file);
                 $this->exec(sprintf('Encrypt file: %s', $file), $command, null, false);
             }
         }
 
-        if ($write) {
+        if ($this->getInputOption('write')) {
             $this->io->writeln('<info>Files encrypteds</info>');
         } else {
             $this->io->writeln('<info>Files would be encrypteds if --write option.</info>');
@@ -51,8 +51,8 @@ class Backend extends AbstractBackend implements BackendInterface
      */
     public function decrypt()
     {
-        $files   = $this->getFiles(self::ENCRYPT);
-        $write   = $this->getInputOption('write');
+        $files            = $this->getFiles(self::ENCRYPT);
+        $defaultArguments = $this->buildDefaultArguments();
 
         foreach ($files as $k => $file) {
             $files[$k] .= '.gpg';
@@ -63,7 +63,7 @@ class Backend extends AbstractBackend implements BackendInterface
 
             while (!$isOk) {
                 $passphrase = $this->io->askHiddenResponse('Enter passphrase: ');
-                $command    = sprintf('gpg --no-use-agent --yes %s --passphrase "%s" --decrypt-files %s', (!$write) ? '--dry-run': '', $passphrase, implode(' ', $files));
+                $command    = sprintf('gpg %s --no-use-agent %s --passphrase "%s" --decrypt-files %s', $defaultArguments, $passphrase, implode(' ', $files));
                 try {
                     $output     = $this->exec('Decrypt files', $command, null, false);
                     $isOk       = true;
@@ -71,11 +71,11 @@ class Backend extends AbstractBackend implements BackendInterface
                 }
             }
         } else {
-            $command = sprintf('gpg --yes %s --decrypt-files %s', (!$write) ? '--dry-run': '', implode(' ', $files));
+            $command = sprintf('gpg %s --decrypt-files %s', $defaultArguments, implode(' ', $files));
             $this->exec('Decrypt files', $command);
         }
         
-        if ($write) {
+        if ($this->getInputOption('write')) {
             $this->io->writeln('<info>Files decrypteds</info>');
         } else {
             $this->io->writeln('<info>Files would be decrypteds if --write option.</info>');
@@ -130,6 +130,30 @@ class Backend extends AbstractBackend implements BackendInterface
         $this->dumpMetadatas($configurationFile);
 
         $this->io->writeln('<info>Vaultage file created.</info>');
+    }
+
+    /**
+     * @return string
+     */
+    protected function buildDefaultArguments()
+    {
+        $arguments   = array();
+        $arguments[] = '--yes';
+
+        $write   = $this->getInputOption('write');
+
+        if (!$write) {
+            $arguments[] = '--dry-run';
+        }
+
+        if ($this->io->isVerbose()) {
+            $arguments[] = '--verbose';
+        } else {
+            $arguments[] = '--no-verbose';
+            $arguments[] = '--quiet';
+        }
+
+        return implode(' ', $arguments);
     }
    
     protected function exec($label, $command, $exitMessage = null, $showCommand = true)
