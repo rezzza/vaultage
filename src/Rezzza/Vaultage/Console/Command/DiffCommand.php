@@ -57,7 +57,7 @@ class DiffCommand extends BaseCommand
 
             $files[] = array(
                 'file' => $decryptedFile,
-                'content'   => file_get_contents($decryptedFile)
+                'content'   => rtrim(file_get_contents($decryptedFile))
             );
         }
 
@@ -70,8 +70,8 @@ class DiffCommand extends BaseCommand
 
         $output->writeln(sprintf('<info>Diff between <comment>%s</comment> and <comment>%s</comment></info>', $files[0]['file'], $files[1]['file']));
 
-        $from   = trim($files[0]['content']);
-        $to     = trim($files[1]['content']);
+        $from   = $files[0]['content'];
+        $to     = $files[1]['content'];
 
         if ($from == $to) {
             $output->writeln('no diff.');
