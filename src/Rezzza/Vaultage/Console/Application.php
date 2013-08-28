@@ -8,11 +8,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Rezzza\Vaultage\Vaultage;
 use Rezzza\Vaultage\IO\ConsoleIO;
 use Rezzza\Vaultage\IO\IOInterface;
-use Rezzza\Vaultage\Console\Command\CompileCommand;
-use Rezzza\Vaultage\Console\Command\DecryptCommand;
-use Rezzza\Vaultage\Console\Command\EncryptCommand;
-use Rezzza\Vaultage\Console\Command\InitializeCommand;
-use Rezzza\Vaultage\Console\Command\SelfUpdateCommand;
+use Rezzza\Vaultage\Console\Command;
 
 /**
  * @author Fabien Potencier <fabien@symfony.com>
@@ -33,11 +29,12 @@ class Application extends BaseApplication
 
         parent::__construct('Vaultage version', Vaultage::VERSION);
 
-        $this->add(new EncryptCommand());
-        $this->add(new InitializeCommand());
-        $this->add(new DecryptCommand());
-        $this->add(new SelfUpdateCommand());
-        $this->add(new CompileCommand());
+        $this->add(new Command\CompileCommand());
+        $this->add(new Command\DecryptCommand());
+        $this->add(new Command\DiffCommand());
+        $this->add(new Command\EncryptCommand());
+        $this->add(new Command\InitializeCommand());
+        $this->add(new Command\SelfUpdateCommand());
     }
 
     /**

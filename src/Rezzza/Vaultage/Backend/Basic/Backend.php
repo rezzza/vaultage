@@ -106,10 +106,35 @@ class Backend extends AbstractBackend implements BackendInterface
                     if ($verbose) {
                         $this->io->writeln(sprintf('Decrypted data: %s', $data));
                     }
-                    $processed = true;
+
+                    return $data;
                 } catch (\Exception $e) {
                     $this->io->writeln(sprintf('<error>Cannot decrypt file %s: %s</error>', $file->getTo(), $e->getMessage()));
                 }
+            }
+        }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function read($path)
+    {
+        while (true) {
+            if ($this->metadata->needsPassphrase) {
+                $this->metadata->passphrase = $this->io->askHiddenResponse('Enter passphrase: ');
+            }
+
+            $file = new \SplFileInfo($path);
+
+            if (!$file->isReadable()) {
+                throw new ResourceException(sprintf('File "%s" is not writable', $file));
+            }
+
+            try {
+                return $this->cipher
+                    ->decrypt(file_get_contents($file), $this->metadata);
+            } catch (\Exception $e) {
             }
         }
     }

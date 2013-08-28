@@ -24,4 +24,5 @@ interface BackendInterface
     public function encrypt();
     public function decrypt();
     public function initialize($configurationFile);
+    public function read($path);
 }
