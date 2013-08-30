@@ -23,6 +23,10 @@ $ ./vaultage.phar self-update
 
 $ ./vaultage.phar encrypt
 $ ./vaultage.phar decrypt
+
+$ ./vaultage.phar diff --crypted=a.gpg --crypted=b.gpg
+$ ./vaultage.phar diff --crypted=a.gpg --decrypted=a.yml
+$ ./vaultage.phar diff --decrypted=a --decrypted=b
 ```
 
 ### Options
@@ -56,3 +60,4 @@ end
 ## Todo
 
 - Write tests
+- Refactorisation ...

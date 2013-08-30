@@ -34,7 +34,7 @@ class Backend extends AbstractBackend implements BackendInterface
             $passphrase = $this->io->askAndRepeatHidden('Enter passphrase: ', 'Confirm passphrase: ');
 
             foreach ($files as $file) {
-                $command = sprintf('gpg %s --no-use-agent %s --passphrase "%s" -c %s', $defaultArguments, $passphrase, $file);
+                $command = sprintf('gpg %s --no-use-agent --passphrase "%s" -c %s', $defaultArguments, $passphrase, $file);
                 $this->exec(sprintf('Encrypt file: %s', $file), $command, null, false);
             }
         }
@@ -52,11 +52,11 @@ class Backend extends AbstractBackend implements BackendInterface
     public function decrypt()
     {
         $files            = $this->getFiles(self::ENCRYPT);
-        $defaultArguments = $this->buildDefaultArguments();
-
         foreach ($files as $k => $file) {
             $files[$k] .= '.gpg';
         }
+
+        $defaultArguments = $this->buildDefaultArguments();
 
         if (!$this->metadata->asymmetric) {
             $isOk       = false;
@@ -65,7 +65,7 @@ class Backend extends AbstractBackend implements BackendInterface
                 $passphrase = $this->io->askHiddenResponse('Enter passphrase: ');
                 $command    = sprintf('gpg %s --no-use-agent %s --passphrase "%s" --decrypt-files %s', $defaultArguments, $passphrase, implode(' ', $files));
                 try {
-                    $output     = $this->exec('Decrypt files', $command, null, false);
+                    $this->exec('Decrypt files', $command, null, false);
                     $isOk       = true;
                 } catch (\Exception $e) {
                 }
@@ -74,11 +74,31 @@ class Backend extends AbstractBackend implements BackendInterface
             $command = sprintf('gpg %s --decrypt-files %s', $defaultArguments, implode(' ', $files));
             $this->exec('Decrypt files', $command);
         }
-        
+
         if ($this->getInputOption('write')) {
             $this->io->writeln('<info>Files decrypteds</info>');
         } else {
             $this->io->writeln('<info>Files would be decrypteds if --write option.</info>');
+        }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function read($path)
+    {
+        if (!$this->metadata->asymmetric) {
+            while (true) {
+                $passphrase = $this->io->askHiddenResponse('Enter passphrase: ');
+                $command    = sprintf('gpg --no-verbose --no-use-agent --passphrase "%s" -d %s', $passphrase, $path);
+                try {
+                    return $this->exec('Decrypt files', $command, null, false);
+                } catch (\Exception $e) {
+                }
+            }
+        } else {
+            $command    = sprintf('gpg --no-verbose -d < %s', $path);
+            return $this->exec('Decrypt file', $command, null, false);
         }
     }
 
@@ -155,7 +175,7 @@ class Backend extends AbstractBackend implements BackendInterface
 
         return implode(' ', $arguments);
     }
-   
+
     protected function exec($label, $command, $exitMessage = null, $showCommand = true)
     {
         $verbose = $this->io->isVerbose();
