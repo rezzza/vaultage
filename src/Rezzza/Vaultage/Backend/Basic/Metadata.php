@@ -3,7 +3,7 @@
 namespace Rezzza\Vaultage\Backend\Basic;
 
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Rezzza\Vaultage\File;
+use Rezzza\Vaultage\Resource;
 use Rezzza\Vaultage\Backend\MetadataInterface;
 
 /**
@@ -19,8 +19,17 @@ class Metadata implements MetadataInterface
     public $key;
     public $needsPassphrase = false;
     public $passphrase;
+    protected $encryptedExtension = 'crypted';
 
-    protected $files = array();
+    public $files;
+
+    /**
+     * constructor
+     */
+    public function __construct()
+    {
+        $this->files = new Resource\FileCollection();
+    }
 
     /**
      * {@inheritdoc}
@@ -32,12 +41,14 @@ class Metadata implements MetadataInterface
         $resolver = new OptionsResolver();
         $resolver->setRequired(array('key', 'files'));
         $resolver->setDefaults(array(
-            'backend'    => null,
-            'passphrase' => false,
+            'backend'             => null,
+            'passphrase'          => false,
+            'encrypted_extension' => 'crypted',
         ));
         $resolver->setAllowedTypes(array(
-            'key'        => 'string',
-            'files'      => 'array',
+            'key'                 => 'string',
+            'encrypted_extension' => 'string',
+            'files'               => 'array',
         ));
 
         $data = $resolver->resolve($data);
@@ -60,22 +71,11 @@ class Metadata implements MetadataInterface
         $this->key             = $key;
         $this->needsPassphrase = $data['passphrase'];
 
-        foreach ($data['files'] as $from => $to) {
-            $this->addFile(new File($from, $to, getcwd()));
+        foreach ($data['files'] as $path) {
+            $this->files->add(
+                new Resource\File($path, $this->getEncryptedExtension())
+            );
         }
-    }
-
-    /**
-     * @param string $from from
-     * @param string $to   to
-     *
-     * @return Metadata
-     */
-    public function addFile(File $file)
-    {
-        $this->files[] = $file;
-
-        return $this;
     }
 
     /**
@@ -105,6 +105,19 @@ class Metadata implements MetadataInterface
     }
 
     /**
+     * {@inheritdoc}
+     */
+    public function getEncryptedExtension()
+    {
+        return $this->encryptedExtension;
+    }
+
+    public function setEncryptedExtension($v)
+    {
+        $this->encryptedExtension = $v;
+    }
+
+    /**
      * Export metadatas to configuration format
      *
      * @return array
@@ -112,45 +125,17 @@ class Metadata implements MetadataInterface
     public function exportConfiguration()
     {
         $data = array(
-            'backend'    => 'basic',
-            'key'        => (null !== $this->keyFile) ? $this->keyFile : $this->key,
-            'passphrase' => $this->needsPassphrase,
-            'files'      => array(),
+            'backend'             => 'basic',
+            'key'                 => (null !== $this->keyFile) ? $this->keyFile : $this->key,
+            'passphrase'          => $this->needsPassphrase,
+            'encrypted_extension' => $this->getEncryptedExtension(),
+            'files'               => array(),
         );
 
         foreach ($this->files as $file) {
-            $data['files'][$file->getFrom()] = $file->getTo();
+            $data['files'][] = $file->getSourceFile();
         }
 
         return $data;
     }
-
-    /**
-     * @param string $name name
-     *
-     * @return File|null
-     */
-    public function findDecryptedFile($name)
-    {
-        foreach ($this->files as $file) {
-            if ($file->getFrom() == $name) {
-                return $file;
-            }
-        }
-    }
-
-    /**
-     * @param string $name name
-     *
-     * @return File|null
-     */
-    public function findCryptedFile($name)
-    {
-        foreach ($this->files as $file) {
-            if ($file->getTo() == $name) {
-                return $file;
-            }
-        }
-    }
-
 }

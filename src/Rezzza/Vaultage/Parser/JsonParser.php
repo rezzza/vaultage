@@ -18,7 +18,6 @@ class JsonParser implements ParserInterface
      */
     public function parse($file)
     {
-        //$path    = $metadata->configuration;
         $content = file_get_contents($file);
 
         if (false === $content) {
@@ -28,7 +27,7 @@ class JsonParser implements ParserInterface
         $content = json_decode(file_get_contents($file), true);
 
         if (null === $content) {
-            throw new ResourceException(sprintf('File "%s" is not at JSON format', $path));
+            throw new ResourceException(sprintf('File "%s" is not at JSON format', $file));
         }
 
         $backend = (isset($content['backend'])) ? $content['backend'] : 'basic';

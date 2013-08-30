@@ -22,11 +22,12 @@ $ ./vaultage.phar init
 $ ./vaultage.phar self-update
 
 $ ./vaultage.phar encrypt
+$ ./vaultage.phar encrypt --files=myfile.yml
 $ ./vaultage.phar decrypt
+$ ./vaultage.phar decrypt --files=myfile.yml.gpg
 
-$ ./vaultage.phar diff --crypted=a.gpg --crypted=b.gpg
-$ ./vaultage.phar diff --crypted=a.gpg --decrypted=a.yml
-$ ./vaultage.phar diff --decrypted=a --decrypted=b
+$ ./vaultage.phar diff --files=a.gpg,b.gpg
+$ ./vaultage.phar diff --files=a.yml,a.gpg
 ```
 
 ### Options

@@ -2,8 +2,11 @@
 
 namespace Rezzza\Vaultage\Console\Command;
 
+use Rezzza\Vaultage\Resource;
+
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
@@ -23,7 +26,8 @@ class DecryptCommand extends BaseCommand
 
         $this
             ->setName('decrypt')
-            ->setDescription('Decrypt files');
+            ->setDescription('Decrypt files')
+            ;
     }
 
     /**
@@ -31,8 +35,25 @@ class DecryptCommand extends BaseCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->getBackend($input->getOption('configuration-file'))
+        $resource = $this->getBackend($input->getOption('configuration-file'))
             ->setIO($this->getIO())
-            ->decrypt();
+            ->decrypt(
+                $this->getResource($input),
+                array(
+                    'write' => $input->getOption('write'),
+                    'verbose' => $input->getOption('verbose'),
+                )
+            );
+
+        if ($input->getOption('write')) {
+            $output->writeln('<info>Writing ...</info>');
+            $resource->write();
+        } else {
+            $output->writeln('<info>DRY RUN mode... Add --write to deactivate this mode.</info>');
+        }
+
+        if ($input->getOption('verbose')) {
+            $output->writeln((string) $resource);
+        }
     }
 }

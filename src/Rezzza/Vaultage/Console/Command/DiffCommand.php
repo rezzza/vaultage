@@ -9,6 +9,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Rezzza\Vaultage\Compiler\Compiler;
 use SebastianBergmann\Diff\Differ;
+use Rezzza\Vaultage\Resource;
 
 /**
  * DiffCommand
@@ -28,8 +29,6 @@ class DiffCommand extends BaseCommand
         $this
             ->setName('diff')
             ->setDescription('Show diff between crypted file with crypted file|file.')
-            ->addOption('crypted', 'e', InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY)
-            ->addOption('decrypted', 'd', InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY)
             ;
     }
 
@@ -38,40 +37,29 @@ class DiffCommand extends BaseCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $cryptedFiles   = $input->getOption('crypted');
-        $decryptedFiles = $input->getOption('decrypted');
-
-        if (count($cryptedFiles) + count($decryptedFiles) !== 2) {
+        $files = $this->getResource($input);
+        if (count($files) != 2) {
             throw new \InvalidArgumentException('You have to define 2 files.');
         }
 
-        $files = array();
+        $results   = array();
 
-        $backend = $this->getBackend($input->getOption('configuration-file'))
-            ->setIO($this->getIO());
-
-        foreach ($decryptedFiles as $decryptedFile) {
-            if (!is_readable($decryptedFile)) {
-                throw new \LogicException(sprintf('File "%s" is not readable.', $decryptedFile));
+        foreach ($files as $file) {
+            if ($file->isCrypted()) {
+                $file = $this->getBackend($input->getOption('configuration-file'))
+                    ->setIO($this->getIO())
+                    ->decrypt($file)
+                    ;
             }
-
-            $files[] = array(
-                'file' => $decryptedFile,
-                'content'   => rtrim(file_get_contents($decryptedFile))
-            );
         }
 
-        foreach ($cryptedFiles as $cryptedFile) {
-            $files[] = array(
-                'file' => $cryptedFile,
-                'content' => $backend->read($cryptedFile)
-            );
-        }
+        $it = $files->getIterator();
+        $output->writeln(
+            sprintf('<info>Diff between <comment>%s</comment> and <comment>%s</comment></info>', $it[0]->getSourceFile(), $it[1]->getSourceFile())
+        );
 
-        $output->writeln(sprintf('<info>Diff between <comment>%s</comment> and <comment>%s</comment></info>', $files[0]['file'], $files[1]['file']));
-
-        $from   = $files[0]['content'];
-        $to     = $files[1]['content'];
+        $from   = $this->clean($it[0]->isCrypted() ? $it[0]->getTargetContent() : $it[0]->getSourceContent());
+        $to     = $this->clean($it[1]->isCrypted() ? $it[1]->getTargetContent() : $it[1]->getSourceContent());
 
         if ($from == $to) {
             $output->writeln('no diff.');
@@ -79,5 +67,10 @@ class DiffCommand extends BaseCommand
             $differ = new Differ();
             echo $differ->diff($from, $to);
         }
+    }
+
+    protected function clean($v)
+    {
+        return rtrim($v);
     }
 }

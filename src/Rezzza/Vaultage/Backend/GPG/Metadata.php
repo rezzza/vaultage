@@ -3,7 +3,7 @@
 namespace Rezzza\Vaultage\Backend\GPG;
 
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Rezzza\Vaultage\File;
+use Rezzza\Vaultage\Resource;
 use Rezzza\Vaultage\Backend\MetadataInterface;
 
 /**
@@ -16,8 +16,18 @@ class Metadata implements MetadataInterface
 {
     public $configuration;
     public $asymmetric = true;
-    public $files = array();
+    public $files;
     public $recipients = array();
+
+    protected $encryptedExtension = 'gpg';
+
+    /**
+     * constructor
+     */
+    public function __construct()
+    {
+        $this->files = new Resource\FileCollection();
+    }
 
     /**
      * {@inheritdoc}
@@ -41,24 +51,13 @@ class Metadata implements MetadataInterface
 
         $this->asymmetric = (bool) $data['asymmetric'];
 
-        foreach ($data['files'] as $file) {
-            $this->addFile(new File($file, null, getcwd()));
+        foreach ($data['files'] as $path) {
+            $this->files->add(
+                new Resource\File($path, $this->getEncryptedExtension())
+            );
         }
 
         $this->recipients = $data['recipients'];
-    }
-
-    /**
-     * @param string $from from
-     * @param string $to   to
-     *
-     * @return Metadata
-     */
-    public function addFile(File $file)
-    {
-        $this->files[] = $file;
-
-        return $this;
     }
 
     /**
@@ -67,6 +66,14 @@ class Metadata implements MetadataInterface
     public function getFiles()
     {
         return $this->files;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getEncryptedExtension()
+    {
+        return $this->encryptedExtension;
     }
 
     /**
@@ -83,7 +90,7 @@ class Metadata implements MetadataInterface
         );
 
         foreach ($this->files as $file) {
-            $data['files'][] = $file->getFrom();
+            $data['files'][] = $file->getSourceFile();
         }
 
         if ($this->asymmetric) {
@@ -91,30 +98,5 @@ class Metadata implements MetadataInterface
         }
 
         return $data;
-    }
-
-    /**
-     * @param string $name name
-     *
-     * @return File|null
-     */
-    public function findDecryptedFile($name)
-    {
-        // same files.
-        return $this->findCryptedFile($name);
-    }
-
-    /**
-     * @param string $name name
-     *
-     * @return File|null
-     */
-    public function findCryptedFile($name)
-    {
-        foreach ($this->files as $file) {
-            if ($file->getFrom() == $name) {
-                return $file;
-            }
-        }
     }
 }

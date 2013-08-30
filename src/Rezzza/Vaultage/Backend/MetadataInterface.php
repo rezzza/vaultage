@@ -21,21 +21,12 @@ interface MetadataInterface
     public function getFiles();
 
     /**
+     * @return string
+     */
+    public function getEncryptedExtension();
+
+    /**
      * @return boolean
      */
     public function exportConfiguration();
-
-    /**
-     * @param string $name name
-     *
-     * @return array
-     */
-    public function findDecryptedFile($name);
-
-    /**
-     * @param string $name name
-     *
-     * @return array
-     */
-    public function findCryptedFile($name);
 }
