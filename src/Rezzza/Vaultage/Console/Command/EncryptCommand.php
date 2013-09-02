@@ -31,8 +31,28 @@ class EncryptCommand extends BaseCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->getBackend($input->getOption('configuration-file'))
+        $resource = $this->getBackend($input->getOption('configuration-file'))
             ->setIO($this->getIO())
-            ->encrypt();
+            ->encrypt(
+                $this->getResource($input),
+                array(
+                    'write' => $input->getOption('write'),
+                    'verbose' => $input->getOption('verbose'),
+                )
+            );
+
+        if ($input->getOption('write')) {
+            $output->writeln('<info>Writing ...</info>');
+            $resource->write();
+        } else {
+            $output->writeln('<info>DRY RUN mode... Add --write to deactivate this mode.</info>');
+        }
+
+        if ($input->getOption('verbose')) {
+            foreach ($resource as $file) {
+                $output->writeln(sprintf('<comment>============================= %s =============================</comment>', $file->getSourceFile()));
+                $output->writeln($file->getTargetContent());
+            }
+        }
     }
 }

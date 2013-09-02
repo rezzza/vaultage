@@ -7,9 +7,10 @@ Default configuration
     "backend": "basic",
     "key": "file://~/.vaultage/your_project.key",
     "passphrase": true,
-    "files": {
-        "app/config/parameters.yml": "app/config/parameters.yml.crypted"
-    }
+    "encrypted_extension": "crypted",
+    "files": [
+        "app/config/parameters.yml"
+    ]
 }
 ```
 

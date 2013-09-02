@@ -4,17 +4,60 @@ namespace Rezzza\Vaultage\Backend;
 
 use Rezzza\Vaultage\IO\IOInterface;
 use Rezzza\Vaultage\Dumper\ArrayDumper;
+use Rezzza\Vaultage\Resource\ResourceInterface;
 
 abstract class AbstractBackend
 {
+    /**
+     * @var Io\IOInterface
+     */
     protected $io;
 
+    /**
+     * @var MetadataInterface
+     */
     protected $metadata;
 
-    protected $cipher;
+    /**
+     * @var array
+     */
+    protected $resourceProcessors = array();
 
-    CONST ENCRYPT = 'encrypt';
-    CONST DECRYPT = 'decrypt';
+    /**
+     * {@inheritdoc}
+     */
+    public function encrypt(ResourceInterface $resource, array $options = array())
+    {
+        foreach ($this->resourceProcessors as $resourceProcessor) {
+            if ($resourceProcessor->accepts($resource))  {
+                return $resourceProcessor->encrypt($resource, $this, $options);
+            }
+        }
+
+        throw new \Exception(sprintf('There is no resourceProcessor available for Resource "%s" on this backend.', get_class($resource)));
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function decrypt(ResourceInterface $resource, array $options = array())
+    {
+        foreach ($this->resourceProcessors as $resourceProcessor) {
+            if ($resourceProcessor->accepts($resource))  {
+                return $resourceProcessor->decrypt($resource, $this, $options);
+            }
+        }
+
+        throw new \Exception(sprintf('There is no resourceProcessor available for Resource "%s" on this backend.', get_class($resource)));
+    }
+
+    /**
+     * @param ResourceProcessorInterface $resourceProcessor resourceProcessor
+     */
+    public function addResourceProcessor(ResourceProcessorInterface $resourceProcessor)
+    {
+        $this->resourceProcessors[] = $resourceProcessor;
+    }
 
     /**
      * @param IOInterface $io io
@@ -26,6 +69,14 @@ abstract class AbstractBackend
         $this->io = $io;
 
         return $this;
+    }
+
+    /**
+     * @return IOInterface
+     */
+    public function getIo()
+    {
+        return $this->io;
     }
 
     /**
@@ -66,26 +117,10 @@ abstract class AbstractBackend
     }
 
     /**
-     * @param string $type type
-     *
-     * @return array
+     * @return MetadataInterface
      */
-    public function getFiles($type = self::ENCRYPT)
+    public function getMetadata()
     {
-        $files = $this->getInputOption('files');
-
-        if (empty($files)) {
-            return $this->metadata->getFiles();
-        }
-
-        $files  = array_filter(explode(',', $files));
-        $data   = array();
-        $method = $type === self::ENCRYPT ? 'findDecryptedFile' : 'findCryptedFile';
-
-        foreach ($files as $file) {
-            $data[] = $this->metadata->{$method}($file);
-        }
-
-        return array_filter($data);
+        return $this->metadata;
     }
 }

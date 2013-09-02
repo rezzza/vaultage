@@ -3,6 +3,7 @@
 namespace Rezzza\Vaultage\Backend;
 
 use Rezzza\Vaultage\IO\IOInterface;
+use Rezzza\Vaultage\Resource\ResourceInterface;
 
 interface BackendInterface
 {
@@ -21,8 +22,7 @@ interface BackendInterface
      */
     public function setIO(IOInterface $io);
 
-    public function encrypt();
-    public function decrypt();
+    public function encrypt(ResourceInterface $resource, array $options = array());
+    public function decrypt(ResourceInterface $resource, array $options = array());
     public function initialize($configurationFile);
-    public function read($path);
 }
