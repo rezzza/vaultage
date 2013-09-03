@@ -30,7 +30,7 @@ class FileCollection implements ResourceInterface, \Countable, \IteratorAggregat
             $strs[] = (string) $file;
         }
 
-        return implode(chr(10), $file);
+        return implode(chr(10), $strs);
     }
 
     /**
