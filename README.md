@@ -61,4 +61,3 @@ end
 ## Todo
 
 - Write tests
-- Refactorisation ...
