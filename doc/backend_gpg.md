@@ -41,4 +41,16 @@ Symetric ask you a passphrase to crypt files. You have to share this passphrase 
 }
 ```
 
+## GPG Usage
+1. Generate your key : `gpg --gen-key`
+2. Get your key ident: `gpg --list-keys`
+3. Send your key to dist server : `gpg --keyserver pgp.mit.edu --send-keys YOURKEYIDENT`
+4. Get the key from your friends : `gpg --keyserver pgp.mit.edu --recv-keys FRIENDKEY`
+5. Indicate you trust a key: 
+```
+gpg --edit-key FRIENDKEY
+# In shell gpg opened
+trust
+```
+
 [Back to home](/README.md)
