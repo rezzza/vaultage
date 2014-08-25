@@ -46,11 +46,13 @@ Symetric ask you a passphrase to crypt files. You have to share this passphrase 
 2. Get your key ident: `gpg --list-keys`
 3. Send your key to dist server : `gpg --keyserver pgp.mit.edu --send-keys YOURKEYIDENT`
 4. Get the key from your friends : `gpg --keyserver pgp.mit.edu --recv-keys FRIENDKEY`
+5. Alternatively you can search all key verylastoom with : `gpg --keyserver pgp.mit.edu --search-keys verylastroom`
 5. Indicate you trust a key: 
 ```
 gpg --edit-key FRIENDKEY
 # In shell gpg opened
 trust
+# Then choose 5th options (I trust ultimately)
 ```
 
 [Back to home](/README.md)
