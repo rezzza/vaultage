@@ -26,6 +26,9 @@
             "Rezzza\\Vaultage": "src/"
         }
     },
+    "bin": [
+        "vaultage"
+    ],
     "config": {
         "bin-dir": "bin"
     },
