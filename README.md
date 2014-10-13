@@ -15,6 +15,12 @@ Fits well with automated deployment tools.
 
 `curl -O -sL https://github.com/rezzza/vaultage/raw/master/vaultage.phar`
 
+**via composer**
+
+`composer global require "rezzza/vaultage=~1.0"`
+
+Vaultage binary path: `~/.composer/vendor/bin/vaultage`
+
 ## Commands
 
 ```sh
@@ -57,7 +63,3 @@ before "deploy:share_childs" do
     top.upload(origin_file, destination_file)
 end
 ```
-
-## Todo
-
-- Write tests
