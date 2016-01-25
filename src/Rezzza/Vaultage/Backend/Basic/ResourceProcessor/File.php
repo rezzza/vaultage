@@ -3,6 +3,7 @@
 namespace Rezzza\Vaultage\Backend\Basic\ResourceProcessor;
 
 use Rezzza\Vaultage\Backend\BackendInterface;
+use Rezzza\Vaultage\Exception\BadCredentialsException;
 use Rezzza\Vaultage\Backend\Basic\Cipher;
 use Rezzza\Vaultage\Backend\ResourceProcessorInterface;
 use Rezzza\Vaultage\Resource\File as Resource;
@@ -76,6 +77,7 @@ class File implements ResourceProcessorInterface
                 );
                 $processed = true;
             } catch (\Exception $e) {
+                throw new BadCredentialsException('Bad credentials');
             }
         }
 
