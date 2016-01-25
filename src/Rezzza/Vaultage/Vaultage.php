@@ -13,7 +13,7 @@ use Rezzza\Vaultage\Parser\ParserInterface;
  */
 class Vaultage
 {
-    CONST VERSION = '1.0b';
+    CONST VERSION = '1.0c';
 
     /**
      * @var BackendInterface
