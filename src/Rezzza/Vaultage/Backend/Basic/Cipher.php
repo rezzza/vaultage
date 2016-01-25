@@ -87,6 +87,6 @@ class Cipher
             $phrase .= ':'.$metadata->passphrase;
         }
 
-        return mhash(MHASH_SHA1, $phrase);
+        return mhash(MHASH_SHA256, $phrase);
     }
 }
