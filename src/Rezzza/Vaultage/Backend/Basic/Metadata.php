@@ -46,9 +46,9 @@ class Metadata implements MetadataInterface
             'encrypted_extension' => 'crypted',
         ));
         $resolver->setAllowedTypes(array(
-            'key'                 => 'string',
-            'encrypted_extension' => 'string',
-            'files'               => 'array',
+            'key'                 => ['string'],
+            'encrypted_extension' => ['string'],
+            'files'               => ['array'],
         ));
 
         $data = $resolver->resolve($data);
