@@ -45,11 +45,10 @@ class Metadata implements MetadataInterface
             'passphrase'          => false,
             'encrypted_extension' => 'crypted',
         ));
-        $resolver->setAllowedTypes(array(
-            'key'                 => ['string'],
-            'encrypted_extension' => ['string'],
-            'files'               => ['array'],
-        ));
+
+        $resolver->setAllowedTypes('key', 'string');
+        $resolver->setAllowedTypes('encrypted_extension', 'string');
+        $resolver->setAllowedTypes('files', 'array');
 
         $data = $resolver->resolve($data);
         $key  = $data['key'];
