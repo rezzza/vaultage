@@ -12,13 +12,13 @@
     "require": {
         "php": ">=5.3.3",
         "ext-mcrypt": "*",
-        "symfony/options-resolver": "2.2.*",
-        "symfony/console": "2.2.*",
-        "symfony/process": "2.2.*",
+        "symfony/options-resolver": "~2.2|~3.0",
+        "symfony/console": "~2.2|~3.0",
+        "symfony/process": "~2.2|~3.0",
         "sebastian/diff": "*"
     },
     "require-dev": {
-        "symfony/finder": "2.1.*",
+        "symfony/finder": "~2.1|~3.0",
         "atoum/atoum": "dev-master"
     },
     "autoload":     {
